@@ -1,0 +1,6 @@
+id,counterparty,requiredValue,minAAA,minAA,minA,minBBB,minBB,minB,minMunicipal,minSovereign,minCorporate
+D1,BuyerA,5000000,90,0,0,0,0,0,0,0,0
+D2,BuyerB,7000000,0,10,10,10,0,0,50,0,20
+D3,BuyerC,6000000,50,10,10,10,10,10,10,20,30
+D4,BuyerD,4000000,0,0,0,0,0,0,0,0,0
+D5,BuyerE,8000000,60,10,15,5,5,5,20,30,10

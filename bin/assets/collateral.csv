@@ -1,0 +1,13 @@
+id,bondType,creditRating,quantity,price
+C1,Sovereign,AAA,100,100000
+C2,Municipal,AA,50,40000
+C3,Sovereign,AAA,75,95000
+C4,Corporate,A,30,33000
+C5,Municipal,BBB,40,38000
+C6,Sovereign,AAA,60,98000
+C7,Corporate,BBB,45,36000
+C8,Municipal,AA,55,41000
+C9,Sovereign,AA,80,97000
+C10,Corporate,AA,35,35000
+C11,Municipal,A,65,42000
+C12,Sovereign,AAA,90,101000
