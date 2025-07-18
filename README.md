@@ -1,18 +1,27 @@
-## Getting Started
+## Objective
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+To build an engine that:
+- Reads available internal collateral (bonds) from CSV
+- Reads a set of repo deals with constraints (e.g., minimum % of AAA-rated bonds, minimum % of Municipal bonds)
+- Satisfies as much of the repo deal requirements as possible using internal collateral
+- Borrows any shortfall from an external borrowing market (also defined in CSV)
+- Minimizes the total borrowing cost when external collateral is needed
+- **Uses a greedy approach that prioritizes deals that would be most expensive to borrow for**
 
-## Folder Structure
+## Approach
 
-The workspace contains two folders by default, where:
+We use a greedy algorithm to minimize total borrowing cost across all repo deals:
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
+1. **Estimate Worst-Case Borrow Cost**  
+   For each repo deal, calculate how expensive it would be to fulfill using only the external borrowing market. This includes checking the borrow rate for each required bond type and credit rating.
 
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
+2. **Sort Deals by Estimated Borrow Cost (Descending)**  
+   The deals are sorted in descending order based on their worst-case borrowing cost. This ensures the most expensive-to-borrow deals are solved first.
 
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
+3. **Allocate Internal Inventory First**  
+   For each deal, attempt to satisfy the constraints using internal collateral. If internal collateral is insufficient, borrow bonds from the external market.
 
-## Dependency Management
+4. **Track and Minimize Borrow Cost**  
+   Every unit of borrowed collateral is multiplied by its borrow rate to compute the total borrow cost for that deal. The engine tracks the overall borrowing cost and quantity used.
 
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
+This greedy strategy ensures internal collateral is used where it matters most and prevents expensive deals from draining the borrow market late in the process.
