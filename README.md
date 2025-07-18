@@ -1,3 +1,16 @@
+## 📘 What is a Repurchase Agreement?
+
+A **repurchase agreement (repo)** is a short-term loan where one party sells securities (typically bonds) to another with an agreement to repurchase them later at a higher price. It's a common method for financial institutions to raise liquidity.
+
+- **Seller = Borrower**: Needs cash now, so they "sell" a bond.
+- **Buyer = Lender**: Provides cash in exchange for the bond as collateral.
+- The **repurchase price** includes interest — that’s the lender’s profit.
+
+In this project, we simulate the internal decision-making process of a firm attempting to fulfill repo deals using its own bond inventory. If internal assets are insufficient, the firm must borrow external collateral — but at a higher cost.
+
+The goal is to **minimize total borrow cost** while satisfying each repo deal’s constraints on bond type and credit rating.
+
+
 ## Objective
 
 To build an engine that:
@@ -22,6 +35,6 @@ We use a greedy algorithm to minimize total borrowing cost across all repo deals
    For each deal, attempt to satisfy the constraints using internal collateral. If internal collateral is insufficient, borrow bonds from the external market.
 
 4. **Track and Minimize Borrow Cost**  
-   Every unit of borrowed collateral is multiplied by its borrow rate to compute the total borrow cost for that deal. The engine tracks the overall borrowing cost and quantity used.
+   External collateral is not modeled in units. Instead, the shortfall is treated as a dollar value (e.g., $126), and the borrow cost is computed by multiplying that shortfall by the applicable borrow rate from the external market.
 
 This greedy strategy ensures internal collateral is used where it matters most and prevents expensive deals from draining the borrow market late in the process.
