@@ -3,33 +3,19 @@ package models;
 //id,bondType,creditRating,borrowRate
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
-public class BorrowBond {
-    private final String id;
-    private final String type;
-    private final String creditRating;
+public class BorrowBond extends Bond {
     private final BigDecimal borrowRate;
 
-    public BorrowBond(String id, String type, String creditRating, BigDecimal borrowRate) {
-        this.id = id;
-        this.type = type;
-        this.creditRating = creditRating;
+
+
+    public BorrowBond(String id, String type, String creditRating, BigInteger quantity, BigDecimal price, BigDecimal borrowRate) {
+        super(id, type, creditRating, quantity, price);
         this.borrowRate = borrowRate;
     }
 
     // Getters
-    public String getId() {
-        return id;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public String getCreditRating() {
-        return creditRating;
-    }
-
     public BigDecimal getBorrowRate() {
         return borrowRate;
     }
@@ -37,11 +23,13 @@ public class BorrowBond {
     @Override
     public String toString() {
         return "BorrowBond{" +
-                "id='" + id + '\'' +
-                ", type='" + type + '\'' +
-                ", creditRating='" + creditRating + '\'' +
+                "id='" + getId() + '\'' +
+                ", type='" + getType() + '\'' +
+                ", creditRating='" + getCreditRating() + '\'' +
+                ", quantity=" + getQuantity() +
+                ", price=" + getPrice() +
                 ", borrowRate=" + borrowRate +
                 '}';
     }
-        
+
 }
