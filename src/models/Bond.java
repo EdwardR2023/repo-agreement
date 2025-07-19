@@ -37,6 +37,15 @@ public class Bond {
         return price;
     }
 
-
+    @Override
+    public String toString() {
+        return "Bond{" +
+                "id='" + id + '\'' +
+                ", type='" + type + '\'' +
+                ", creditRating='" + creditRating + '\'' +
+                ", quantity=" + quantity +
+                ", price=" + price +
+                '}';
+            }
 }
 

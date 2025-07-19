@@ -43,4 +43,15 @@ public class RepoDeal {
     public Map<String, BigDecimal> getTypeRequirements() {
         return typeRequirements;
     }
+
+    @Override
+    public String toString() {
+        return "RepoDeal{" +
+                "id='" + id + '\'' +
+                ", totalValueRequired=" + totalValueRequired +
+                ", ratingRequirements=" + ratingRequirements +
+                ", typeRequirements=" + typeRequirements +
+                '}';
+    }
+    
 }

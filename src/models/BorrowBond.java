@@ -34,5 +34,14 @@ public class BorrowBond {
         return borrowRate;
     }
 
-    
+    @Override
+    public String toString() {
+        return "BorrowBond{" +
+                "id='" + id + '\'' +
+                ", type='" + type + '\'' +
+                ", creditRating='" + creditRating + '\'' +
+                ", borrowRate=" + borrowRate +
+                '}';
+    }
+        
 }
