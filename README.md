@@ -38,3 +38,17 @@ We use a greedy algorithm to minimize total borrowing cost across all repo deals
    External collateral is not modeled in units. Instead, the shortfall is treated as a dollar value (e.g., $126), and the borrow cost is computed by multiplying that shortfall by the applicable borrow rate from the external market.
 
 This greedy strategy ensures internal collateral is used where it matters most and prevents expensive deals from draining the borrow market late in the process.
+
+
+## How to Compile and Run the Project
+Prerequisites:
+   Java 17+ installed
+   This project uses plain .java files (no Maven or Gradle)
+
+Compile:
+Run this from the project root (where the src/ folder is located): javac -d out src/models/\*.java src/util/\*.java src/Main.java
+
+Run:
+After compiling, run the program with: java -cp out Main
+
+
