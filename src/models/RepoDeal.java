@@ -85,9 +85,32 @@ public class RepoDeal {
         return typeRequirements;
     }
 
+      public Map<String, BigDecimal> getRatingFulfilled() {
+        return ratingFulfilled;
+    }
+
+    public Map<String, BigDecimal> getTypeFulfilled() {
+        return typeFulfilled;
+    }
+
     //setter
     public void setBorrowCost(BigDecimal borrowCost) {
         this.borrowCost = borrowCost;
+    }
+
+    public void setRatingFulfilled(Map<String, BigDecimal> ratingFulfilled) {
+        this.ratingFulfilled = ratingFulfilled;
+    }
+    public void setTypeFulfilled(Map<String, BigDecimal> typeFulfilled) {
+        this.typeFulfilled = typeFulfilled;
+    }
+
+    public void addToRatingFulfilled(String rating, BigDecimal value) {
+        this.ratingFulfilled.put(rating, this.ratingFulfilled.getOrDefault(rating, BigDecimal.ZERO).add(value));
+    }
+
+    public void addToTypeFulfilled(String type, BigDecimal value) {
+        this.typeFulfilled.put(type, this.typeFulfilled.getOrDefault(type, BigDecimal.ZERO).add(value));
     }
 
     @Override
