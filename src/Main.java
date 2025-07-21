@@ -23,8 +23,8 @@ public class Main {
 
         try {
             return DataLoader.loadBonds(filepath);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (java.io.IOException | RuntimeException e) {
+            System.err.println("Error loading bonds: " + e.getMessage());
             return List.of(); // return empty list on failure
         }
     }

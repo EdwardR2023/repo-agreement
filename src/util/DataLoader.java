@@ -46,6 +46,21 @@ public class DataLoader {
     return bonds;
 }
 
+// PG-1
+// TODO: Implement a method that loads data from a `RepoDeals.csv` file and returns a List<RepoDeal>.
+// The format will be similar to how bonds are loaded in `loadBonds(...)` above.
+// You'll need to:
+// - Parse each line of the CSV (skip the header).
+// - Extract the required fields for each RepoDeal:
+//     > id (String)
+//     > totalValueRequired (BigDecimal)
+//     > ratingRequirements (Map<String, BigDecimal>)
+//     > typeRequirements (Map<String, BigDecimal>)
+// - Construct and return RepoDeal objects.
+//
+// Let me know if you need help designing the CSV format or parsing the 
+// requirement maps (they may look like: "AAA:0.5,AA:0.3,B:0.2").
+
 
     
 }
