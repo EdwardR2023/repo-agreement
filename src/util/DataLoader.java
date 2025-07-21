@@ -20,9 +20,6 @@ public class DataLoader {
 
     public static List<Bond> loadBonds(String filepath) throws IOException {
     List<Bond> bonds = new ArrayList<>();
-    String path = "../assets";
-    String name = "collateral.csv";
-    filepath = path + "/" + name;
 
     try (BufferedReader br = Files.newBufferedReader(Paths.get(filepath))) {
         String line;
