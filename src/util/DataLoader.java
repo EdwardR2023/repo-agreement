@@ -47,11 +47,5 @@ public class DataLoader {
 }
 
 
-    public static void loadData() {
-        // Implement data loading logic here
-        System.out.println("DataLoader is ready to load data.");
-        
-        
-    }
     
 }
