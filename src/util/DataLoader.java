@@ -49,7 +49,9 @@ public class DataLoader {
 
     public static void loadData() {
         // Implement data loading logic here
-        System.out.println("Data loading functionality is not yet implemented.");
+        System.out.println("DataLoader is ready to load data.");
+        
+        
     }
     
 }

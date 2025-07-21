@@ -1,29 +1,31 @@
+import java.nio.file.Paths;
 import java.util.List;
 import models.Bond;
 import util.DataLoader;
 
 public class Main {
-   public static void main(String[] args) {
 
-        System.out.println("Hello, World! This is a Repo Agreement application. ");
-        // Load bonds from the CSV file
-        String path = "src/assets";
-        String name = "collateral.csv";
-        String filepath = path + "/" + name;
-        try {
-            List<Bond> bonds = DataLoader.loadBonds(filepath);
+    public static void main(String[] args) {
+        System.out.println("Hello, World! This is a Repo Agreement application.");
 
-            // Print to verify
-            for (Bond bond : bonds) {
-                System.out.println(bond);
-            }
+        List<Bond> bonds = loadCollateralBonds();
 
-            // Next: Pass bonds to your repo allocation logic
-
-
+        for (Bond bond : bonds) {
+            System.out.println(bond);
         }
-        catch (Exception e) {
+
+    }
+
+    
+    private static List<Bond> loadCollateralBonds() {
+        String filepath = Paths.get("src", "assets", "collateral.csv").toString();
+
+
+        try {
+            return DataLoader.loadBonds(filepath);
+        } catch (Exception e) {
             e.printStackTrace();
+            return List.of(); // return empty list on failure
         }
     }
 }
