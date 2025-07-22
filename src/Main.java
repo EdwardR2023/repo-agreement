@@ -3,6 +3,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import models.Bond;
 import models.PossibleBorrowedBond;
+import models.RepoDeal;
 import util.DataLoader;
 
 public class Main {
@@ -12,9 +13,14 @@ public class Main {
 
         List<Bond> bonds = loadCollateralBonds();
         List<PossibleBorrowedBond> possibleBorrowedBonds = loadBorrowMarket();
+        List<RepoDeal> deals = loadDeals();
+        
 
         printInternalCollateral(bonds);
         printBorrowMarket(possibleBorrowedBonds);
+        printRepoDeals(deals);
+
+
 
        
     }
@@ -37,6 +43,16 @@ public class Main {
 
         System.out.println("Loaded " + possibleBorrowedBonds.size() + " external market bonds.");
 
+    }
+
+    private static void printRepoDeals(List<RepoDeal> deals){
+         System.out.println("\n\n\n\nRepo deals:");
+
+        for (RepoDeal repoDeal : deals) {
+            System.out.println(repoDeal);
+        }
+
+        System.out.println("Loaded " + deals.size() + " repo deals.");
     }
 
     private static List<Bond> loadCollateralBonds() {
@@ -62,4 +78,19 @@ public class Main {
         }
 
     }
+
+    private static List<RepoDeal> loadDeals(){
+        String filepath = Paths.get("src", "assets", "repo_deals.csv").toString();
+        
+        try {
+            return DataLoader.loadRepoDeals(filepath);
+        } catch (java.io.IOException | RuntimeException e) {
+            System.err.println("Error loading deals: " + e.getMessage());
+            return List.of(); // return empty list on failure
+        }
+
+
+    } 
+
 }
+

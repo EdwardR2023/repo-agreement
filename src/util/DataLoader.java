@@ -1,7 +1,6 @@
 package util;
 
 // This class is a placeholder for data loading functionality.
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -12,24 +11,23 @@ import java.util.ArrayList;
 import java.util.List;
 import models.Bond;
 import models.PossibleBorrowedBond;
-
-
+import models.RepoDeal;
 
 public class DataLoader {
-    
-    public static List <PossibleBorrowedBond> loadPossibleBorrowedBonds(String filepath) throws IOException {
-        List <PossibleBorrowedBond> borrowMarketList = new ArrayList<>();
 
-        try(BufferedReader br = Files.newBufferedReader(Paths.get(filepath))){
+    public static List<PossibleBorrowedBond> loadPossibleBorrowedBonds(String filepath) throws IOException {
+        List<PossibleBorrowedBond> borrowMarketList = new ArrayList<>();
+
+        try (BufferedReader br = Files.newBufferedReader(Paths.get(filepath))) {
             String line;
             boolean isFirstLine = true;
-            
-            while((line = br.readLine()) != null){
-                if(isFirstLine){
+
+            while ((line = br.readLine()) != null) {
+                if (isFirstLine) {
                     isFirstLine = false;
                     continue;
                 }
-                String []parts = line.split(",");
+                String[] parts = line.split(",");
 
                 String id = parts[0].trim();
                 String bondType = parts[1].trim();
@@ -40,37 +38,36 @@ public class DataLoader {
             }
         }
 
-
         return borrowMarketList;
     }
 
     public static List<Bond> loadBonds(String filepath) throws IOException {
-    List<Bond> bonds = new ArrayList<>();
+        List<Bond> bonds = new ArrayList<>();
 
-    try (BufferedReader br = Files.newBufferedReader(Paths.get(filepath))) {
-        String line;
-        boolean isFirstLine = true;
+        try (BufferedReader br = Files.newBufferedReader(Paths.get(filepath))) {
+            String line;
+            boolean isFirstLine = true;
 
-        while ((line = br.readLine()) != null) {
-            if (isFirstLine) {
-                isFirstLine = false; // skip header
-                continue;
+            while ((line = br.readLine()) != null) {
+                if (isFirstLine) {
+                    isFirstLine = false; // skip header
+                    continue;
+                }
+
+                String[] parts = line.split(",");
+
+                String id = parts[0].trim();
+                String bondType = parts[1].trim();
+                String creditRating = parts[2].trim();
+                BigInteger quantity = BigInteger.valueOf(Integer.parseInt(parts[3].trim()));
+                BigDecimal price = new BigDecimal(parts[4].trim());
+
+                bonds.add(new Bond(id, bondType, creditRating, quantity, price));
             }
-
-            String[] parts = line.split(",");
-
-            String id = parts[0].trim();
-            String bondType = parts[1].trim();
-            String creditRating = parts[2].trim();
-            BigInteger quantity = BigInteger.valueOf(Integer.parseInt(parts[3].trim()));
-            BigDecimal price = new BigDecimal(parts[4].trim());
-
-            bonds.add(new Bond(id, bondType, creditRating, quantity, price));
         }
-    }
 
-    return bonds;
-}
+        return bonds;
+    }
 
 // PG-1
 // TODO: Implement a method that loads data from a `RepoDeals.csv` file and returns a List<RepoDeal>.
@@ -80,6 +77,7 @@ public class DataLoader {
 // - Extract the required fields for each RepoDeal:
 //     > id (String)
 //     > totalValueRequired (BigDecimal)
+//     > shortfal (BigDecimal)
 //     > ratingRequirements (Map<String, BigDecimal>)
 //     > typeRequirements (Map<String, BigDecimal>)
 // - Construct and return RepoDeal objects.
@@ -88,5 +86,12 @@ public class DataLoader {
 // requirement maps (they may look like: "AAA:0.5,AA:0.3,B:0.2").
 
 
-    
+
+//this is what you need to fill in
+    public static List<RepoDeal> loadRepoDeals(String filepath) throws IOException {
+        List<RepoDeal> deals = new ArrayList<>();
+
+        //this is temp
+        return deals;
+    }
 }
