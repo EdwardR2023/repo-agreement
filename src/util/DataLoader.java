@@ -11,12 +11,38 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import models.Bond;
+import models.PossibleBorrowedBond;
 
 
 
 public class DataLoader {
-    // This class can be expanded to include methods for loading data from files, databases, etc.
-    // Currently, it serves as a placeholder for future data loading implementations.
+    
+    public static List <PossibleBorrowedBond> loadPossibleBorrowedBonds(String filepath) throws IOException {
+        List <PossibleBorrowedBond> borrowMarketList = new ArrayList<>();
+
+        try(BufferedReader br = Files.newBufferedReader(Paths.get(filepath))){
+            String line;
+            boolean isFirstLine = true;
+            
+            while((line = br.readLine()) != null){
+                if(isFirstLine){
+                    isFirstLine = false;
+                    continue;
+                }
+                String []parts = line.split(",");
+
+                String id = parts[0].trim();
+                String bondType = parts[1].trim();
+                String creditRating = parts[2].trim();
+                BigDecimal borrowRate = new BigDecimal(parts[3].trim());
+
+                borrowMarketList.add(new PossibleBorrowedBond(id, bondType, creditRating, borrowRate));
+            }
+        }
+
+
+        return borrowMarketList;
+    }
 
     public static List<Bond> loadBonds(String filepath) throws IOException {
     List<Bond> bonds = new ArrayList<>();

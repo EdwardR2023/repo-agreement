@@ -2,13 +2,13 @@ package models;
 
 import java.math.BigDecimal;
 
-public class BorrowBond {
+public class PossibleBorrowedBond {
     private final String id;
     private final String bondType;
     private final String creditRating;
     private final BigDecimal borrowRate;
 
-    public BorrowBond(String id, String bondType, String creditRating, BigDecimal borrowRate) {
+    public PossibleBorrowedBond(String id, String bondType, String creditRating, BigDecimal borrowRate) {
         this.id = id;
         this.bondType = bondType;
         this.creditRating = creditRating;
