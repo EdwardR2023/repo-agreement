@@ -12,6 +12,7 @@ public class RepoDeal {
     private final String id;
     private final BigDecimal totalValueRequired;
     private BigDecimal borrowCost = BigDecimal.ZERO;
+    private BigDecimal shortfall;
 
     private final Map<String, BigDecimal> ratingRequirements;
     private final Map<String, BigDecimal> typeRequirements;
@@ -27,6 +28,7 @@ public class RepoDeal {
     ) {
         this.id = id;
         this.totalValueRequired = totalValueRequired;
+        this.shortfall = this.totalValueRequired;
         this.ratingRequirements = ratingRequirements;
         this.typeRequirements = typeRequirements;
 
@@ -49,6 +51,14 @@ public class RepoDeal {
 
     public void subtractFromBorrowCost(BigDecimal cost) {
         this.borrowCost = this.borrowCost.subtract(cost);
+    }
+
+    public void subtractFromShortfall(BigDecimal value) {
+        this.shortfall = this.shortfall.subtract(value);
+    }
+
+    public boolean isFullySatisfied(){
+        return shortfall.compareTo(BigDecimal.ZERO) <= 0;
     }
 
     public BigDecimal getRequiredValueForRating(String rating) {
@@ -77,6 +87,10 @@ public class RepoDeal {
         return borrowCost;
     }
 
+    public BigDecimal getShortfall() {
+        return shortfall;
+    }
+
     public Map<String, BigDecimal> getRatingRequirements() {
         return ratingRequirements;
     }
@@ -85,7 +99,7 @@ public class RepoDeal {
         return typeRequirements;
     }
 
-      public Map<String, BigDecimal> getRatingFulfilled() {
+    public Map<String, BigDecimal> getRatingFulfilled() {
         return ratingFulfilled;
     }
 
@@ -98,9 +112,14 @@ public class RepoDeal {
         this.borrowCost = borrowCost;
     }
 
+    public void setShortfall(BigDecimal shortfall) {
+        this.shortfall = shortfall;
+    }
+
     public void setRatingFulfilled(Map<String, BigDecimal> ratingFulfilled) {
         this.ratingFulfilled = ratingFulfilled;
     }
+
     public void setTypeFulfilled(Map<String, BigDecimal> typeFulfilled) {
         this.typeFulfilled = typeFulfilled;
     }
@@ -118,6 +137,7 @@ public class RepoDeal {
         return "RepoDeal{"
                 + "id='" + id + '\''
                 + ", totalValueRequired=" + totalValueRequired
+                + ", shortfall=" + shortfall
                 + ", ratingRequirements=" + ratingRequirements
                 + ", typeRequirements=" + typeRequirements
                 + ", borrowCost=" + borrowCost
