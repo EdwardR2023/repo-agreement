@@ -77,13 +77,15 @@ public class DataLoader {
 // - Extract the required fields for each RepoDeal:
 //     > id (String)
 //     > totalValueRequired (BigDecimal)
-//     > shortfal (BigDecimal)
 //     > ratingRequirements (Map<String, BigDecimal>)
 //     > typeRequirements (Map<String, BigDecimal>)
 // - Construct and return RepoDeal objects.
 //
 // Let me know if you need help designing the CSV format or parsing the 
 // requirement maps (they may look like: "AAA:0.5,AA:0.3,B:0.2").
+
+// NOTE: You do not need to manually set the shortfall — it is automatically initialized
+// to totalValueRequired inside the RepoDeal constructor.
 
 
 
