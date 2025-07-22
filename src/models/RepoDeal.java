@@ -45,6 +45,7 @@ public class RepoDeal {
 
     }
 
+    // util methods
     public void addToBorrowCost(BigDecimal cost) {
         this.borrowCost = this.borrowCost.add(cost);
     }
@@ -57,7 +58,7 @@ public class RepoDeal {
         this.shortfall = this.shortfall.subtract(value);
     }
 
-    public boolean isFullySatisfied(){
+    public boolean isFullySatisfied() {
         return shortfall.compareTo(BigDecimal.ZERO) <= 0;
     }
 
@@ -72,6 +73,28 @@ public class RepoDeal {
         return totalValueRequired.multiply(
                 typeRequirements.getOrDefault(type, BigDecimal.ZERO)
         );
+    }
+
+    public boolean isValidRequirements() {
+        BigDecimal ratingSum = ratingRequirements.values().stream()
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal typeSum = typeRequirements.values().stream()
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        boolean ratingsValid = ratingSum.compareTo(BigDecimal.ONE) <= 0
+                && ratingRequirements.values().stream().allMatch(v -> v.compareTo(BigDecimal.ZERO) >= 0);
+
+        boolean typesValid = typeSum.compareTo(BigDecimal.ONE) <= 0
+                && typeRequirements.values().stream().allMatch(v -> v.compareTo(BigDecimal.ZERO) >= 0);
+
+        return ratingsValid && typesValid;
+    }
+
+    public void validateRequirementsOrThrow() {
+        if (!isValidRequirements()) {
+            throw new IllegalArgumentException("Invalid rating/type requirement proportions in RepoDeal: " + id);
+        }
     }
 
     // Getters
