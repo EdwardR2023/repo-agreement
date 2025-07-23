@@ -4,35 +4,81 @@ import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import models.Bond;
 import models.PossibleBorrowedBond;
 import models.RepoDeal;
 
 public class AllocationEngine {
 
-    // Calculate predicted external cost based on the best borrow rate for the bond type
-    public BigDecimal calculateExternalBorrowCost(
-            RepoDeal deal,
-            Map<String, Bond> bondMap,
-            List<PossibleBorrowedBond> borrowMarket) {
+   public static BigDecimal calculateExternalBorrowCost(
+        RepoDeal deal,
+        List<PossibleBorrowedBond> borrowMarket) {
 
-        // 1. Look up the bond to get its type
-        Bond bond = bondMap.get(deal.getId());
-        if (bond == null) {
-            throw new IllegalArgumentException("Bond not found for ID: " + deal.getId());
-        }
+    BigDecimal totalRequired = deal.getTotalValueRequired();
+    BigDecimal totalCost = BigDecimal.ZERO;
 
-        String bondType = bond.getType();
-        BigDecimal requireValue = deal.getTotalValueRequired(); // already in dollars
+    // 1. Sort borrow market by rate (cheapest first)
+    List<PossibleBorrowedBond> sortedMarket = borrowMarket.stream()
+        .sorted(Comparator.comparing(PossibleBorrowedBond::getBorrowRate))
+        .toList();
 
-        // 2. Get the lowest borrow rate for the same bond type
-        return borrowMarket.stream()
-            .filter(b -> b.getBondType().equalsIgnoreCase(bondType))
-            .map(PossibleBorrowedBond::getBorrowRate)
-            .min(Comparator.naturalOrder())
-            .map(rate -> rate.multiply(requireValue))
-            .orElse(BigDecimal.valueOf(Double.POSITIVE_INFINITY));
+    // 2. Fulfill rating constraints
+    for (Map.Entry<String, BigDecimal> entry : deal.getRatingRequirements().entrySet()) {
+        String requiredRating = entry.getKey();
+        BigDecimal requiredPercentage = entry.getValue();
+        BigDecimal requiredAmount = totalRequired.multiply(requiredPercentage).divide(BigDecimal.valueOf(100));
+
+        PossibleBorrowedBond match = sortedMarket.stream()
+            .filter(b -> b.getCreditRating().equalsIgnoreCase(requiredRating))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("No bond found for rating: " + requiredRating));
+
+        BigDecimal rateDecimal = match.getBorrowRate().divide(BigDecimal.valueOf(100));
+        BigDecimal cost = rateDecimal.multiply(requiredAmount);
+        totalCost = totalCost.add(cost);
     }
 
-    // ... other methods
+    // 3. Fulfill type constraints
+    for (Map.Entry<String, BigDecimal> entry : deal.getTypeRequirements().entrySet()) {
+        String requiredType = entry.getKey();
+        BigDecimal requiredPercentage = entry.getValue();
+        BigDecimal requiredAmount = totalRequired.multiply(requiredPercentage).divide(BigDecimal.valueOf(100));
+
+        PossibleBorrowedBond match = sortedMarket.stream()
+            .filter(b -> b.getBondType().equalsIgnoreCase(requiredType))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("No bond found for type: " + requiredType));
+
+        BigDecimal rateDecimal = match.getBorrowRate().divide(BigDecimal.valueOf(100));
+        BigDecimal cost = rateDecimal.multiply(requiredAmount);
+        totalCost = totalCost.add(cost);
+    }
+
+    // 4. Fill any remaining value with the cheapest bond
+    BigDecimal totalAllocated = calculateTotalAllocated(deal);
+    BigDecimal remaining = BigDecimal.ONE.subtract(totalAllocated.divide(BigDecimal.valueOf(100)))
+        .multiply(totalRequired);
+
+    if (remaining.compareTo(BigDecimal.ZERO) > 0) {
+        PossibleBorrowedBond cheapest = sortedMarket.get(0);
+        BigDecimal rateDecimal = cheapest.getBorrowRate().divide(BigDecimal.valueOf(100));
+        BigDecimal cost = rateDecimal.multiply(remaining);
+        totalCost = totalCost.add(cost);
+    }
+
+    return totalCost;
+}
+
+// Helper to calculate total allocation percentage (0 to 100)
+private static BigDecimal calculateTotalAllocated(RepoDeal deal) {
+    BigDecimal sum = BigDecimal.ZERO;
+    for (BigDecimal v : deal.getRatingRequirements().values()) {
+        sum = sum.add(v);
+    }
+    for (BigDecimal v : deal.getTypeRequirements().values()) {
+        sum = sum.add(v);
+    }
+    return sum;
+}
+
+    
 }
