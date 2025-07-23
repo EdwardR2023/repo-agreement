@@ -1,0 +1,13 @@
+# Ignore compiled class files
+*.class
+
+# Ignore compiled output directory
+/out/
+
+# Ignore IDE-specific files (optional, but recommended)
+.vscode/
+.idea/
+
+# Ignore system files (optional)
+.DS_Store
+Thumbs.db
