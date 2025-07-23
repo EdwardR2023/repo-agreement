@@ -8,10 +8,20 @@ import models.RepoDeal;
 
 public class AllocationEngine {
 
-    public static BigDecimal calculateExternalBorrowCost(
-            RepoDeal deal,
-            List<PossibleBorrowedBond> borrowMarket) {
+    public static BigDecimal calculateExternalBorrowCost(RepoDeal deal, List<PossibleBorrowedBond> borrowMarket) {
+        try {
+            return calculateLowToHighRatingStrategy(deal, borrowMarket);
+        } catch (IllegalStateException e) {
+            System.out.println("Primary strategy failed for deal " + deal.getId() + ": " + e.getMessage());
+            System.out.println("Falling back to alternate strategy...");
+            return calculateFallbackStrategy(deal, borrowMarket);
+        }
 
+    }
+
+    private static BigDecimal calculateLowToHighRatingStrategy(RepoDeal deal, List<PossibleBorrowedBond> borrowMarket) {
+        // Your current low-to-high credit rating implementation goes here.
+        // It must throw UnfulfillableConstraintException if any constraint is unmet and total value is capped.
         BigDecimal totalRequired = deal.getTotalValueRequired();
         BigDecimal totalCost = BigDecimal.ZERO;
         BigDecimal remaining = totalRequired;
@@ -101,12 +111,28 @@ public class AllocationEngine {
         }
 
         // Debug print
-        System.out.println("---- Allocation Breakdown for Deal " + deal.getId() + " ----");
+        System.out.println("\n\n\n\n---- Allocation Breakdown for Deal " + deal.getId() + " ----");
         allocations.forEach(System.out::println);
         System.out.printf("Total Borrow Cost: $%.2f%n", totalCost);
         System.out.println("--------------------------------------------");
 
+        // Check if any constraints are unmet
+        boolean ratingUnmet = ratingLeft.values().stream().anyMatch(v -> v.compareTo(BigDecimal.ZERO) > 0);
+        boolean typeUnmet = typeLeft.values().stream().anyMatch(v -> v.compareTo(BigDecimal.ZERO) > 0);
+
+        if ((ratingUnmet || typeUnmet) && remaining.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalStateException("Could not fulfill all constraints within total value.");
+
+        }
+
         return totalCost;
+
+    }
+
+    private static BigDecimal calculateFallbackStrategy(RepoDeal deal, List<PossibleBorrowedBond> borrowMarket) {
+        // Simple greedy fallback or new logic you want to try
+        // For now just throw until implemented
+        throw new UnsupportedOperationException("Fallback strategy not yet implemented.");
     }
 
 }
