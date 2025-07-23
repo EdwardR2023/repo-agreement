@@ -25,36 +25,32 @@ public class Main {
        
     }
 
-    private static void printInternalCollateral(List<Bond> bonds) {
-
-        System.out.println("Collateral Bonds:");
-        for (Bond bond : bonds) {
-            System.out.println(bond);
-        }
-        System.out.println("Loaded " + bonds.size() + " internal collateral bonds.");
+   private static void printInternalCollateral(List<Bond> bonds) {
+    System.out.println("\n==================== Collateral Bonds ====================");
+    for (Bond bond : bonds) {
+        System.out.println(bond);
+        System.out.println("---------------------------------------------------------");
     }
+    System.out.println("Loaded " + bonds.size() + " internal collateral bonds.");
+}
 
-    private static void printBorrowMarket(List<PossibleBorrowedBond> possibleBorrowedBonds) {
-        System.out.println("\n\n\n\nBorrow Market Bonds:");
-
-        for (PossibleBorrowedBond possibleBorrowedBond : possibleBorrowedBonds) {
-            System.out.println(possibleBorrowedBond);
-        }
-
-        System.out.println("Loaded " + possibleBorrowedBonds.size() + " external market bonds.");
-
+private static void printBorrowMarket(List<PossibleBorrowedBond> possibleBorrowedBonds) {
+    System.out.println("\n==================== Borrow Market Bonds ====================");
+    for (PossibleBorrowedBond possibleBorrowedBond : possibleBorrowedBonds) {
+        System.out.println(possibleBorrowedBond);
+        System.out.println("------------------------------------------------------------");
     }
+    System.out.println("Loaded " + possibleBorrowedBonds.size() + " external market bonds.");
+}
 
-    private static void printRepoDeals(List<RepoDeal> deals){
-         System.out.println("\n\n\n\nRepo deals:");
-
-        for (RepoDeal repoDeal : deals) {
-            System.out.println(repoDeal);
-        }
-
-        System.out.println("Loaded " + deals.size() + " repo deals.");
+private static void printRepoDeals(List<RepoDeal> deals){
+    System.out.println("\n==================== Repo Deals ====================");
+    for (RepoDeal repoDeal : deals) {
+        System.out.println(repoDeal);
+        System.out.println("---------------------------------------------------");
     }
-
+    System.out.println("Loaded " + deals.size() + " repo deals.");
+}
     private static List<Bond> loadCollateralBonds() {
         String filepath = Paths.get("src", "assets", "collateral.csv").toString();
 

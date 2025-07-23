@@ -8,7 +8,9 @@ import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import models.Bond;
 import models.PossibleBorrowedBond;
 import models.RepoDeal;
@@ -27,6 +29,7 @@ public class DataLoader {
                     isFirstLine = false;
                     continue;
                 }
+                
                 String[] parts = line.split(",");
 
                 String id = parts[0].trim();
@@ -87,13 +90,59 @@ public class DataLoader {
 // NOTE: You do not need to manually set the shortfall — it is automatically initialized
 // to totalValueRequired inside the RepoDeal constructor.
 
+public static List<RepoDeal> loadRepoDeals(String filepath) throws IOException {
+    System.out.println("Loading repo deals from: " + filepath);
+    List<RepoDeal> repoDeals = new ArrayList<>();
 
+    try (BufferedReader br = Files.newBufferedReader(Paths.get(filepath))) {
+        String line;
+        boolean isFirstLine = true;
 
-//this is what you need to fill in
-    public static List<RepoDeal> loadRepoDeals(String filepath) throws IOException {
-        List<RepoDeal> deals = new ArrayList<>();
+        while ((line = br.readLine()) != null) {
+            System.out.println("DEBUG: " + line);
 
-        //this is temp
-        return deals;
+            if (isFirstLine) {
+                isFirstLine = false;
+                continue;
+            }
+
+            String[] parts = line.split(",");
+            System.out.println("Columns: " + parts.length);
+
+            if (parts.length < 12) {
+                System.out.println("Skipping line, not enough columns: " + line);
+                continue;
+            }
+
+            try {
+                String id = parts[0].trim();
+                BigDecimal totalValueRequired = new BigDecimal(parts[2].trim());
+
+                Map<String, BigDecimal> ratingRequirements = new HashMap<>();
+                if (!parts[3].trim().equals("0")) ratingRequirements.put("AAA", new BigDecimal(parts[3].trim()));
+                if (!parts[4].trim().equals("0")) ratingRequirements.put("AA", new BigDecimal(parts[4].trim()));
+                if (!parts[5].trim().equals("0")) ratingRequirements.put("A", new BigDecimal(parts[5].trim()));
+                if (!parts[6].trim().equals("0")) ratingRequirements.put("BBB", new BigDecimal(parts[6].trim()));
+                if (!parts[7].trim().equals("0")) ratingRequirements.put("BB", new BigDecimal(parts[7].trim()));
+                if (!parts[8].trim().equals("0")) ratingRequirements.put("B", new BigDecimal(parts[8].trim()));
+
+                Map<String, BigDecimal> typeRequirements = new HashMap<>();
+                if (!parts[9].trim().equals("0")) typeRequirements.put("Municipal", new BigDecimal(parts[9].trim()));
+                if (!parts[10].trim().equals("0")) typeRequirements.put("Sovereign", new BigDecimal(parts[10].trim()));
+                if (!parts[11].trim().equals("0")) typeRequirements.put("Corporate", new BigDecimal(parts[11].trim()));
+
+                System.out.println("Parsed RepoDeal: id=" + id + ", totalValueRequired=" + totalValueRequired +
+                    ", ratingRequirements=" + ratingRequirements + ", typeRequirements=" + typeRequirements);
+
+                repoDeals.add(new RepoDeal(id, totalValueRequired, ratingRequirements, typeRequirements));
+            } catch (Exception e) {
+                System.out.println("Error parsing line: " + line);
+                e.printStackTrace();
+            }
+        }
     }
+    System.out.println("Total loaded repo deals: " + repoDeals.size());
+    return repoDeals;
+}
+
 }
