@@ -16,7 +16,25 @@ import models.PossibleBorrowedBond;
 import models.RepoDeal;
 
 public class DataLoader {
-
+   
+    /**
+     * Loads a list of {@link PossibleBorrowedBond} objects from a CSV file.
+     * <p>
+     * The CSV file is expected to have the following columns in order:
+     * <ul>
+     *   <li>id (String)</li>
+     *   <li>bondType (String)</li>
+     *   <li>creditRating (String)</li>
+     *   <li>borrowRate (BigDecimal)</li>
+     * </ul>
+     * The first line of the file is assumed to be a header and will be skipped.
+     * Each subsequent line is parsed and converted into a {@code PossibleBorrowedBond} instance.
+     * </p>
+     *
+     * @param filepath the path to the CSV file containing possible borrowed bonds
+     * @return a list of {@code PossibleBorrowedBond} objects loaded from the file
+     * @throws IOException if an I/O error occurs reading from the file
+     */
     public static List<PossibleBorrowedBond> loadPossibleBorrowedBonds(String filepath) throws IOException {
         List<PossibleBorrowedBond> borrowMarketList = new ArrayList<>();
 
@@ -44,6 +62,16 @@ public class DataLoader {
         return borrowMarketList;
     }
 
+    
+    /**
+     * Loads a list of Bond objects from a CSV file at the specified filepath.
+     * The CSV file is expected to have a header row and the following columns:
+     * id, bondType, creditRating, quantity, price.
+     *
+     * @param filepath the path to the CSV file containing bond data
+     * @return a list of Bond objects parsed from the file
+     * @throws IOException if an I/O error occurs reading from the file
+     */
     public static List<Bond> loadBonds(String filepath) throws IOException {
         List<Bond> bonds = new ArrayList<>();
 
@@ -90,6 +118,33 @@ public class DataLoader {
 // NOTE: You do not need to manually set the shortfall — it is automatically initialized
 // to totalValueRequired inside the RepoDeal constructor.
 
+/**
+ * Loads a list of {@link RepoDeal} objects from a CSV file at the specified filepath.
+ * <p>
+ * The CSV file is expected to have a header row, which will be skipped. Each subsequent line should contain
+ * at least 12 comma-separated columns in the following order:
+ * <ul>
+ *   <li>0: id (String)</li>
+ *   <li>1: (unused)</li>
+ *   <li>2: totalValueRequired (BigDecimal)</li>
+ *   <li>3: AAA rating requirement (BigDecimal, "0" if not applicable)</li>
+ *   <li>4: AA rating requirement (BigDecimal, "0" if not applicable)</li>
+ *   <li>5: A rating requirement (BigDecimal, "0" if not applicable)</li>
+ *   <li>6: BBB rating requirement (BigDecimal, "0" if not applicable)</li>
+ *   <li>7: BB rating requirement (BigDecimal, "0" if not applicable)</li>
+ *   <li>8: B rating requirement (BigDecimal, "0" if not applicable)</li>
+ *   <li>9: Municipal type requirement (BigDecimal, "0" if not applicable)</li>
+ *   <li>10: Sovereign type requirement (BigDecimal, "0" if not applicable)</li>
+ *   <li>11: Corporate type requirement (BigDecimal, "0" if not applicable)</li>
+ * </ul>
+ * Rating and type requirements with a value of "0" are ignored.
+ * <p>
+ * Lines with fewer than 12 columns are skipped. Any parsing errors are logged and the corresponding line is skipped.
+ *
+ * @param filepath the path to the CSV file containing repo deal data
+ * @return a list of {@link RepoDeal} objects parsed from the file
+ * @throws IOException if an I/O error occurs reading from the file
+ */
 public static List<RepoDeal> loadRepoDeals(String filepath) throws IOException {
     System.out.println("Loading repo deals from: " + filepath);
     List<RepoDeal> repoDeals = new ArrayList<>();
