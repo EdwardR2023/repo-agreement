@@ -19,6 +19,10 @@ public class AllocationEngine {
 
     }
 
+    //still has issues with deals that have too many constraints like deal 5.
+    //this works for all other deals but needs more testing
+    //will need to create a new strategy for those cases
+    //or improve this one to handle more complex constraints
     private static BigDecimal calculateLowToHighRatingStrategy(RepoDeal deal, List<PossibleBorrowedBond> borrowMarket) {
         // Your current low-to-high credit rating implementation goes here.
         // It must throw UnfulfillableConstraintException if any constraint is unmet and total value is capped.
