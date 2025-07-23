@@ -191,7 +191,7 @@ public static List<RepoDeal> loadRepoDeals(String filepath) throws IOException {
                 repoDeals.add(new RepoDeal(id, totalValueRequired, ratingRequirements, typeRequirements));
             } catch (Exception e) {
                 System.out.println("Error parsing line: " + line);
-                e.printStackTrace();
+                System.err.println("Exception: " + e.getMessage());
             }
         }
     }
