@@ -99,7 +99,6 @@ public static List<RepoDeal> loadRepoDeals(String filepath) throws IOException {
         boolean isFirstLine = true;
 
         while ((line = br.readLine()) != null) {
-            System.out.println("DEBUG: " + line);
 
             if (isFirstLine) {
                 isFirstLine = false;
