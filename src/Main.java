@@ -17,10 +17,10 @@ public class Main {
         List<PossibleBorrowedBond> possibleBorrowedBonds = loadBorrowMarket();
         List<RepoDeal> deals = loadDeals();
 
-        /* printInternalCollateral(bonds);
+/*      printInternalCollateral(bonds);
         printBorrowMarket(possibleBorrowedBonds);
-        printRepoDeals(deals); */
-
+        printRepoDeals(deals);
+ */
         for (RepoDeal deal : deals) {
             BigDecimal cost = AllocationEngine.calculateExternalBorrowCost(deal, possibleBorrowedBonds);
             deal.setBorrowCost(cost);
