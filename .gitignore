@@ -11,3 +11,6 @@
 # Ignore system files (optional)
 .DS_Store
 Thumbs.db
+
+# Ignore Eclipse/VSCode or general compiled output
+/bin/
