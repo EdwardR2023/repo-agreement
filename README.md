@@ -46,9 +46,11 @@ Prerequisites:
    This project uses plain .java files (no Maven or Gradle)
 
 Compile:
-Run this from the project root (where the src/ folder is located): javac -d out src/models/\*.java src/util/\*.java src/Main.java
+Run this from the project root (where the src/ folder is located): javac -cp ".;ojalgo-55.2.0.jar" -d out src/models/*.java src/util/*.java src/core/*.java src/Main.java
+
 
 Run:
-After compiling, run the program with: java -cp out Main
+After compiling, run the program with: java -cp "out;ojalgo-55.2.0.jar" Main
+
 
 
