@@ -18,21 +18,13 @@ public class AllocationEngine {
         }
     }
 
-    //still has issues with deals that have too many constraints like deal 5.
-    //this works for all other deals but needs more testing
-    //will need to create a new strategy for those cases
-    //or improve this one to handle more complex constraints
     private static BigDecimal calculateLowToHighRatingStrategy(RepoDeal deal, List<PossibleBorrowedBond> borrowMarket) {
-        // Your current low-to-high credit rating implementation goes here.
-        // It must throw UnfulfillableConstraintException if any constraint is unmet and total value is capped.
         BigDecimal totalRequired = deal.getTotalValueRequired();
         BigDecimal totalCost = BigDecimal.ZERO;
         BigDecimal remaining = totalRequired;
 
-        // Track allocations for debugging
         List<Allocation> allocations = new ArrayList<>();
 
-        // Prepare mutable requirement maps with values in dollars
         Map<String, BigDecimal> ratingLeft = deal.getRatingRequirements().entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
@@ -45,17 +37,12 @@ public class AllocationEngine {
                         e -> totalRequired.multiply(e.getValue()).divide(BigDecimal.valueOf(100))
                 ));
 
-        // Define credit rating order (lowest quality to highest)
         List<String> ratingOrder = List.of("B", "BB", "BBB", "A", "AA", "AAA");
 
-        // 1. Fulfill rating constraints (low to high)
         for (String rating : ratingOrder) {
             BigDecimal needed = ratingLeft.getOrDefault(rating, BigDecimal.ZERO);
-            if (needed.compareTo(BigDecimal.ZERO) <= 0) {
-                continue;
-            }
+            if (needed.compareTo(BigDecimal.ZERO) <= 0) continue;
 
-            // Find the cheapest bond with this rating (any type)
             PossibleBorrowedBond bond = borrowMarket.stream()
                     .filter(b -> b.getCreditRating().equalsIgnoreCase(rating))
                     .min(Comparator.comparing(PossibleBorrowedBond::getBorrowRate))
@@ -67,7 +54,6 @@ public class AllocationEngine {
             remaining = remaining.subtract(needed);
             ratingLeft.put(rating, BigDecimal.ZERO);
 
-            // Check if it fulfills a type constraint too
             String bondType = bond.getBondType();
             BigDecimal typeNeed = typeLeft.getOrDefault(bondType, BigDecimal.ZERO);
             if (typeNeed.compareTo(BigDecimal.ZERO) > 0) {
@@ -78,13 +64,10 @@ public class AllocationEngine {
             allocations.add(new Allocation(bond, needed, Set.of(rating, bondType)));
         }
 
-        // 2. Fulfill remaining type constraints
         for (Map.Entry<String, BigDecimal> entry : typeLeft.entrySet()) {
             String type = entry.getKey();
             BigDecimal typeNeed = entry.getValue();
-            if (typeNeed.compareTo(BigDecimal.ZERO) <= 0) {
-                continue;
-            }
+            if (typeNeed.compareTo(BigDecimal.ZERO) <= 0) continue;
 
             PossibleBorrowedBond bond = borrowMarket.stream()
                     .filter(b -> b.getBondType().equalsIgnoreCase(type))
@@ -100,7 +83,6 @@ public class AllocationEngine {
             allocations.add(new Allocation(bond, typeNeed, Set.of(type)));
         }
 
-        // 3. Fill remaining value with the cheapest bond overall
         if (remaining.compareTo(BigDecimal.ZERO) > 0) {
             PossibleBorrowedBond bond = borrowMarket.stream()
                     .min(Comparator.comparing(PossibleBorrowedBond::getBorrowRate))
@@ -113,7 +95,6 @@ public class AllocationEngine {
             allocations.add(new Allocation(bond, remaining, Set.of("Unconstrained")));
         }
 
-        // Check if any constraints are unmet or if we over-allocated
         boolean ratingUnmet = ratingLeft.values().stream().anyMatch(v -> v.compareTo(BigDecimal.ZERO) > 0);
         boolean typeUnmet = typeLeft.values().stream().anyMatch(v -> v.compareTo(BigDecimal.ZERO) > 0);
 
@@ -121,29 +102,112 @@ public class AllocationEngine {
                 .map(a -> a.amount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        if ((ratingUnmet || typeUnmet) && remaining.compareTo(BigDecimal.ZERO) <= 0|| totalAllocated.compareTo(totalRequired) > 0) {
+        if ((ratingUnmet || typeUnmet) && remaining.compareTo(BigDecimal.ZERO) <= 0 || totalAllocated.compareTo(totalRequired) > 0) {
             throw new UnfulfillableConstraintException("Invalid allocation: constraints unmet or over-allocated.");
         }
-        // Debug print
+
         System.out.println("\n---- Allocation Breakdown for Deal " + deal.getId() + " ----");
         allocations.forEach(System.out::println);
         System.out.printf("Total Borrow Cost: $%.2f%n", totalCost);
         System.out.println("--------------------------------------------\n\n\n");
 
         return totalCost;
-
     }
 
     private static BigDecimal calculateFallbackStrategy(RepoDeal deal, List<PossibleBorrowedBond> borrowMarket) {
-        // Simple greedy fallback or new logic you want to try
-        // For now just throw until implemented
-        throw new UnsupportedOperationException("Fallback strategy not yet implemented.");
+        List<Allocation> bestSolution = new ArrayList<>();
+        BigDecimal[] bestCost = {null};
+
+        backtrack(deal, borrowMarket, 0, new ArrayList<>(), BigDecimal.ZERO, BigDecimal.ZERO, bestSolution, bestCost);
+
+        if (bestSolution.isEmpty()) {
+            throw new UnfulfillableConstraintException("Backtracking failed: no valid allocation found.");
+        }
+
+        System.out.println("\n\n\n---- Backtracking Allocation Breakdown for Deal " + deal.getId() + " ----");
+        BigDecimal totalCost = BigDecimal.ZERO;
+        for (Allocation alloc : bestSolution) {
+            System.out.println(alloc);
+            totalCost = totalCost.add(alloc.rate.divide(BigDecimal.valueOf(100)).multiply(alloc.amount));
+        }
+        System.out.printf("Total Backtracking Borrow Cost: $%.2f%n", totalCost);
+        System.out.println("--------------------------------------------------");
+
+        return totalCost;
     }
 
+    private static void backtrack(
+            RepoDeal deal,
+            List<PossibleBorrowedBond> market,
+            int index,
+            List<Allocation> current,
+            BigDecimal currentValue,
+            BigDecimal currentCost,
+            List<Allocation> bestSolution,
+            BigDecimal[] bestCost
+    ) {
+        BigDecimal totalRequired = deal.getTotalValueRequired();
+
+        if (currentValue.compareTo(totalRequired) >= 0) {
+            if (isValidAllocation(deal, current)) {
+                if (bestCost[0] == null || currentCost.compareTo(bestCost[0]) < 0) {
+                    bestCost[0] = currentCost;
+                    bestSolution.clear();
+                    bestSolution.addAll(new ArrayList<>(current));
+                }
+            }
+            return;
+        }
+
+        if (index >= market.size()) return;
+
+        PossibleBorrowedBond bond = market.get(index);
+        BigDecimal maxIncrement = totalRequired.subtract(currentValue);
+
+        BigDecimal step = totalRequired.multiply(BigDecimal.valueOf(0.20)); // 20% step
+
+        for (BigDecimal amt = BigDecimal.ZERO;
+             amt.compareTo(maxIncrement) <= 0;
+             amt = amt.add(step)) {
+
+            if (amt.compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal rate = bond.getBorrowRate().divide(BigDecimal.valueOf(100));
+                BigDecimal newCost = currentCost.add(rate.multiply(amt));
+                current.add(new Allocation(bond, amt, Set.of(bond.getBondType(), bond.getCreditRating())));
+                backtrack(deal, market, index + 1, current, currentValue.add(amt), newCost, bestSolution, bestCost);
+                current.remove(current.size() - 1);
+            } else {
+                backtrack(deal, market, index + 1, current, currentValue, currentCost, bestSolution, bestCost);
+            }
+        }
+    }
+
+    private static boolean isValidAllocation(RepoDeal deal, List<Allocation> allocations) {
+        BigDecimal total = deal.getTotalValueRequired();
+
+        Map<String, BigDecimal> ratingMap = new HashMap<>();
+        Map<String, BigDecimal> typeMap = new HashMap<>();
+
+        for (Allocation alloc : allocations) {
+            ratingMap.merge(alloc.creditRating, alloc.amount, BigDecimal::add);
+            typeMap.merge(alloc.bondType, alloc.amount, BigDecimal::add);
+        }
+
+        for (Map.Entry<String, BigDecimal> req : deal.getRatingRequirements().entrySet()) {
+            BigDecimal required = total.multiply(req.getValue()).divide(BigDecimal.valueOf(100));
+            if (ratingMap.getOrDefault(req.getKey(), BigDecimal.ZERO).compareTo(required) < 0) return false;
+        }
+
+        for (Map.Entry<String, BigDecimal> req : deal.getTypeRequirements().entrySet()) {
+            BigDecimal required = total.multiply(req.getValue()).divide(BigDecimal.valueOf(100));
+            if (typeMap.getOrDefault(req.getKey(), BigDecimal.ZERO).compareTo(required) < 0) return false;
+        }
+
+        return true;
+    }
 }
 
 class Allocation {
-
     public final String bondId;
     public final String bondType;
     public final String creditRating;
@@ -168,7 +232,6 @@ class Allocation {
 }
 
 class UnfulfillableConstraintException extends RuntimeException {
-
     public UnfulfillableConstraintException(String message) {
         super(message);
     }
