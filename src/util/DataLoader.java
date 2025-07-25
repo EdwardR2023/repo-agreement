@@ -16,23 +16,26 @@ import models.PossibleBorrowedBond;
 import models.RepoDeal;
 
 public class DataLoader {
-   
+
     /**
      * Loads a list of {@link PossibleBorrowedBond} objects from a CSV file.
      * <p>
      * The CSV file is expected to have the following columns in order:
      * <ul>
-     *   <li>id (String)</li>
-     *   <li>bondType (String)</li>
-     *   <li>creditRating (String)</li>
-     *   <li>borrowRate (BigDecimal)</li>
+     * <li>id (String)</li>
+     * <li>bondType (String)</li>
+     * <li>creditRating (String)</li>
+     * <li>borrowRate (BigDecimal)</li>
      * </ul>
      * The first line of the file is assumed to be a header and will be skipped.
-     * Each subsequent line is parsed and converted into a {@code PossibleBorrowedBond} instance.
+     * Each subsequent line is parsed and converted into a
+     * {@code PossibleBorrowedBond} instance.
      * </p>
      *
-     * @param filepath the path to the CSV file containing possible borrowed bonds
-     * @return a list of {@code PossibleBorrowedBond} objects loaded from the file
+     * @param filepath the path to the CSV file containing possible borrowed
+     * bonds
+     * @return a list of {@code PossibleBorrowedBond} objects loaded from the
+     * file
      * @throws IOException if an I/O error occurs reading from the file
      */
     public static List<PossibleBorrowedBond> loadPossibleBorrowedBonds(String filepath) throws IOException {
@@ -47,7 +50,7 @@ public class DataLoader {
                     isFirstLine = false;
                     continue;
                 }
-                
+
                 String[] parts = line.split(",");
 
                 String id = parts[0].trim();
@@ -62,7 +65,6 @@ public class DataLoader {
         return borrowMarketList;
     }
 
-    
     /**
      * Loads a list of Bond objects from a CSV file at the specified filepath.
      * The CSV file is expected to have a header row and the following columns:
@@ -114,89 +116,105 @@ public class DataLoader {
 //
 // Let me know if you need help designing the CSV format or parsing the 
 // requirement maps (they may look like: "AAA:0.5,AA:0.3,B:0.2").
-
 // NOTE: You do not need to manually set the shortfall — it is automatically initialized
 // to totalValueRequired inside the RepoDeal constructor.
+    /**
+     * Loads a list of {@link RepoDeal} objects from a CSV file at the specified
+     * filepath.
+     * <p>
+     * The CSV file is expected to have a header row, which will be skipped.
+     * Each subsequent line should contain at least 12 comma-separated columns
+     * in the following order:
+     * <ul>
+     * <li>0: id (String)</li>
+     * <li>1: (unused)</li>
+     * <li>2: totalValueRequired (BigDecimal)</li>
+     * <li>3: AAA rating requirement (BigDecimal, "0" if not applicable)</li>
+     * <li>4: AA rating requirement (BigDecimal, "0" if not applicable)</li>
+     * <li>5: A rating requirement (BigDecimal, "0" if not applicable)</li>
+     * <li>6: BBB rating requirement (BigDecimal, "0" if not applicable)</li>
+     * <li>7: BB rating requirement (BigDecimal, "0" if not applicable)</li>
+     * <li>8: B rating requirement (BigDecimal, "0" if not applicable)</li>
+     * <li>9: Municipal type requirement (BigDecimal, "0" if not
+     * applicable)</li>
+     * <li>10: Sovereign type requirement (BigDecimal, "0" if not
+     * applicable)</li>
+     * <li>11: Corporate type requirement (BigDecimal, "0" if not
+     * applicable)</li>
+     * </ul>
+     * Rating and type requirements with a value of "0" are ignored.
+     * <p>
+     * Lines with fewer than 12 columns are skipped. Any parsing errors are
+     * logged and the corresponding line is skipped.
+     *
+     * @param filepath the path to the CSV file containing repo deal data
+     * @return a list of {@link RepoDeal} objects parsed from the file
+     * @throws IOException if an I/O error occurs reading from the file
+     */
+    public static List<RepoDeal> loadRepoDeals(String filepath) throws IOException {
+        List<RepoDeal> repoDeals = new ArrayList<>();
 
-/**
- * Loads a list of {@link RepoDeal} objects from a CSV file at the specified filepath.
- * <p>
- * The CSV file is expected to have a header row, which will be skipped. Each subsequent line should contain
- * at least 12 comma-separated columns in the following order:
- * <ul>
- *   <li>0: id (String)</li>
- *   <li>1: (unused)</li>
- *   <li>2: totalValueRequired (BigDecimal)</li>
- *   <li>3: AAA rating requirement (BigDecimal, "0" if not applicable)</li>
- *   <li>4: AA rating requirement (BigDecimal, "0" if not applicable)</li>
- *   <li>5: A rating requirement (BigDecimal, "0" if not applicable)</li>
- *   <li>6: BBB rating requirement (BigDecimal, "0" if not applicable)</li>
- *   <li>7: BB rating requirement (BigDecimal, "0" if not applicable)</li>
- *   <li>8: B rating requirement (BigDecimal, "0" if not applicable)</li>
- *   <li>9: Municipal type requirement (BigDecimal, "0" if not applicable)</li>
- *   <li>10: Sovereign type requirement (BigDecimal, "0" if not applicable)</li>
- *   <li>11: Corporate type requirement (BigDecimal, "0" if not applicable)</li>
- * </ul>
- * Rating and type requirements with a value of "0" are ignored.
- * <p>
- * Lines with fewer than 12 columns are skipped. Any parsing errors are logged and the corresponding line is skipped.
- *
- * @param filepath the path to the CSV file containing repo deal data
- * @return a list of {@link RepoDeal} objects parsed from the file
- * @throws IOException if an I/O error occurs reading from the file
- */
-public static List<RepoDeal> loadRepoDeals(String filepath) throws IOException {
-    System.out.println("Loading repo deals from: " + filepath);
-    List<RepoDeal> repoDeals = new ArrayList<>();
+        try (BufferedReader br = Files.newBufferedReader(Paths.get(filepath))) {
+            String line;
+            boolean isFirstLine = true;
 
-    try (BufferedReader br = Files.newBufferedReader(Paths.get(filepath))) {
-        String line;
-        boolean isFirstLine = true;
+            while ((line = br.readLine()) != null) {
 
-        while ((line = br.readLine()) != null) {
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue;
+                }
 
-            if (isFirstLine) {
-                isFirstLine = false;
-                continue;
-            }
+                String[] parts = line.split(",");
 
-            String[] parts = line.split(",");
-            System.out.println("Columns: " + parts.length);
+                if (parts.length < 12) {
+                    continue;
+                }
 
-            if (parts.length < 12) {
-                System.out.println("Skipping line, not enough columns: " + line);
-                continue;
-            }
+                try {
+                    String id = parts[0].trim();
+                    BigDecimal totalValueRequired = new BigDecimal(parts[2].trim());
 
-            try {
-                String id = parts[0].trim();
-                BigDecimal totalValueRequired = new BigDecimal(parts[2].trim());
+                    Map<String, BigDecimal> ratingRequirements = new HashMap<>();
+                    if (!parts[3].trim().equals("0")) {
+                        ratingRequirements.put("AAA", new BigDecimal(parts[3].trim()));
+                    }
+                    if (!parts[4].trim().equals("0")) {
+                        ratingRequirements.put("AA", new BigDecimal(parts[4].trim()));
+                    }
+                    if (!parts[5].trim().equals("0")) {
+                        ratingRequirements.put("A", new BigDecimal(parts[5].trim()));
+                    }
+                    if (!parts[6].trim().equals("0")) {
+                        ratingRequirements.put("BBB", new BigDecimal(parts[6].trim()));
+                    }
+                    if (!parts[7].trim().equals("0")) {
+                        ratingRequirements.put("BB", new BigDecimal(parts[7].trim()));
+                    }
+                    if (!parts[8].trim().equals("0")) {
+                        ratingRequirements.put("B", new BigDecimal(parts[8].trim()));
+                    }
 
-                Map<String, BigDecimal> ratingRequirements = new HashMap<>();
-                if (!parts[3].trim().equals("0")) ratingRequirements.put("AAA", new BigDecimal(parts[3].trim()));
-                if (!parts[4].trim().equals("0")) ratingRequirements.put("AA", new BigDecimal(parts[4].trim()));
-                if (!parts[5].trim().equals("0")) ratingRequirements.put("A", new BigDecimal(parts[5].trim()));
-                if (!parts[6].trim().equals("0")) ratingRequirements.put("BBB", new BigDecimal(parts[6].trim()));
-                if (!parts[7].trim().equals("0")) ratingRequirements.put("BB", new BigDecimal(parts[7].trim()));
-                if (!parts[8].trim().equals("0")) ratingRequirements.put("B", new BigDecimal(parts[8].trim()));
+                    Map<String, BigDecimal> typeRequirements = new HashMap<>();
+                    if (!parts[9].trim().equals("0")) {
+                        typeRequirements.put("Municipal", new BigDecimal(parts[9].trim()));
+                    }
+                    if (!parts[10].trim().equals("0")) {
+                        typeRequirements.put("Sovereign", new BigDecimal(parts[10].trim()));
+                    }
+                    if (!parts[11].trim().equals("0")) {
+                        typeRequirements.put("Corporate", new BigDecimal(parts[11].trim()));
+                    }
 
-                Map<String, BigDecimal> typeRequirements = new HashMap<>();
-                if (!parts[9].trim().equals("0")) typeRequirements.put("Municipal", new BigDecimal(parts[9].trim()));
-                if (!parts[10].trim().equals("0")) typeRequirements.put("Sovereign", new BigDecimal(parts[10].trim()));
-                if (!parts[11].trim().equals("0")) typeRequirements.put("Corporate", new BigDecimal(parts[11].trim()));
-
-                System.out.println("Parsed RepoDeal: id=" + id + ", totalValueRequired=" + totalValueRequired +
-                    ", ratingRequirements=" + ratingRequirements + ", typeRequirements=" + typeRequirements);
-
-                repoDeals.add(new RepoDeal(id, totalValueRequired, ratingRequirements, typeRequirements));
-            } catch (Exception e) {
-                System.out.println("Error parsing line: " + line);
-                System.err.println("Exception: " + e.getMessage());
+                    repoDeals.add(new RepoDeal(id, totalValueRequired, ratingRequirements, typeRequirements));
+                } catch (Exception e) {
+                    System.out.println("Error parsing line: " + line);
+                    System.err.println("Exception: " + e.getMessage());
+                }
             }
         }
+
+        return repoDeals;
     }
-    System.out.println("Total loaded repo deals: " + repoDeals.size());
-    return repoDeals;
-}
 
 }

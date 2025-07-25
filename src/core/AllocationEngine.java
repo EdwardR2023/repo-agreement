@@ -11,12 +11,11 @@ public class AllocationEngine {
     public static BigDecimal calculateExternalBorrowCost(RepoDeal deal, List<PossibleBorrowedBond> borrowMarket) {
         try {
             return calculateLowToHighRatingStrategy(deal, borrowMarket);
-        } catch (IllegalStateException e) {
-            System.out.println("Primary strategy failed for deal " + deal.getId() + ": " + e.getMessage());
-            System.out.println("Falling back to alternate strategy...");
+        } catch (UnfulfillableConstraintException e) {
+            System.out.println("Greedy strategy failed for deal " + deal.getId() + ": " + e.getMessage());
+            System.out.println("Falling back to LP strategy...");
             return calculateFallbackStrategy(deal, borrowMarket);
         }
-
     }
 
     //still has issues with deals that have too many constraints like deal 5.
@@ -114,20 +113,22 @@ public class AllocationEngine {
             allocations.add(new Allocation(bond, remaining, Set.of("Unconstrained")));
         }
 
-        // Debug print
-        System.out.println("\n\n\n\n---- Allocation Breakdown for Deal " + deal.getId() + " ----");
-        allocations.forEach(System.out::println);
-        System.out.printf("Total Borrow Cost: $%.2f%n", totalCost);
-        System.out.println("--------------------------------------------");
-
-        // Check if any constraints are unmet
+        // Check if any constraints are unmet or if we over-allocated
         boolean ratingUnmet = ratingLeft.values().stream().anyMatch(v -> v.compareTo(BigDecimal.ZERO) > 0);
         boolean typeUnmet = typeLeft.values().stream().anyMatch(v -> v.compareTo(BigDecimal.ZERO) > 0);
 
-        if ((ratingUnmet || typeUnmet) && remaining.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalStateException("Could not fulfill all constraints within total value.");
+        BigDecimal totalAllocated = allocations.stream()
+                .map(a -> a.amount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        if ((ratingUnmet || typeUnmet) && remaining.compareTo(BigDecimal.ZERO) <= 0|| totalAllocated.compareTo(totalRequired) > 0) {
+            throw new UnfulfillableConstraintException("Invalid allocation: constraints unmet or over-allocated.");
         }
+        // Debug print
+        System.out.println("\n---- Allocation Breakdown for Deal " + deal.getId() + " ----");
+        allocations.forEach(System.out::println);
+        System.out.printf("Total Borrow Cost: $%.2f%n", totalCost);
+        System.out.println("--------------------------------------------\n\n\n");
 
         return totalCost;
 
@@ -163,5 +164,12 @@ class Allocation {
     public String toString() {
         return String.format("Bond %s (%s/%s @ %s%%) → $%.2f used for %s",
                 bondId, creditRating, bondType, rate, amount, constraintsUsed);
+    }
+}
+
+class UnfulfillableConstraintException extends RuntimeException {
+
+    public UnfulfillableConstraintException(String message) {
+        super(message);
     }
 }

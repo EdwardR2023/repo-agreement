@@ -138,6 +138,34 @@ public class RepoDeal {
         return ratingsValid && typesValid;
     }
 
+    public boolean ratingConstraintsSatisfied(Map<String, BigDecimal> allocationMap, BigDecimal totalAllocated) {
+        for (Map.Entry<String, BigDecimal> entry : ratingRequirements.entrySet()) {
+            String rating = entry.getKey();
+            BigDecimal requiredProportion = entry.getValue();
+            BigDecimal requiredValue = totalValueRequired.multiply(requiredProportion);
+
+            BigDecimal allocatedValue = allocationMap.getOrDefault(rating, BigDecimal.ZERO);
+            if (allocatedValue.compareTo(requiredValue) < 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean typeConstraintsSatisfied(Map<String, BigDecimal> allocationMap, BigDecimal totalAllocated) {
+        for (Map.Entry<String, BigDecimal> entry : typeRequirements.entrySet()) {
+            String type = entry.getKey();
+            BigDecimal requiredProportion = entry.getValue();
+            BigDecimal requiredValue = totalValueRequired.multiply(requiredProportion);
+
+            BigDecimal allocatedValue = allocationMap.getOrDefault(type, BigDecimal.ZERO);
+            if (allocatedValue.compareTo(requiredValue) < 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Throws an exception if the rating or type requirement maps are invalid.
      */
